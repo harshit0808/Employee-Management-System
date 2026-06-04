@@ -5,7 +5,6 @@ import com.example.EmployeeManagementSystem.exception.ExceptionEmployee;
 import com.example.EmployeeManagementSystem.mapper.MapperEmployee;
 import com.example.EmployeeManagementSystem.model.Employee;
 import com.example.EmployeeManagementSystem.repository.RepositoryEmployee;
-import org.hibernate.mapping.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,47 +12,64 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class ServiceEmployee implements ServiceEmployeeIn{
+public class ServiceEmployee implements ServiceEmployeeIn {
+
     @Autowired
     private RepositoryEmployee repositoryEmployee;
 
-
     @Override
     public DtoEmployee createEmployee(DtoEmployee dtoEmployee) {
-            Employee employee = MapperEmployee.mapTOEmployee(dtoEmployee);
-            Employee savedEmployee= repositoryEmployee.save(employee);
-            return MapperEmployee.mapToDtoEmployee(savedEmployee);
+        Employee employee = MapperEmployee.mapTOEmployee(dtoEmployee);
+        Employee savedEmployee = repositoryEmployee.save(employee);
+        return MapperEmployee.mapToDtoEmployee(savedEmployee);
     }
 
     @Override
     public DtoEmployee findById(int id) {
-        Employee employee=repositoryEmployee.findById(id).orElseThrow(
-                ()-> new ExceptionEmployee("The Employee is not founded by this give Id" +id));
+        Employee employee = repositoryEmployee.findById(id)
+                .orElseThrow(() ->
+                        new ExceptionEmployee("Employee not found with id: " + id));
+
         return MapperEmployee.mapToDtoEmployee(employee);
     }
 
     @Override
     public List<DtoEmployee> findAllEmployee() {
-         List<Employee> employees= repositoryEmployee.findAll();
-        return employees.stream().map(
-                (employee) -> MapperEmployee.mapToDtoEmployee(employee)).collect(Collectors.toList());
+        List<Employee> employees = repositoryEmployee.findAll();
 
+        return employees.stream()
+                .map(MapperEmployee::mapToDtoEmployee)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public DtoEmployee updateEmployee(int id, DtoEmployee updatedemployee) {
-        Employee employee=repositoryEmployee.findById(id).orElseThrow(
-                ()->new ExceptionEmployee("The Employee is not exist or found by given id" +id));
-        employee.setFirstname(updatedemployee.getFirstname());
-        employee.setLastname(updatedemployee.getLastname());
-        employee.setEmail(updatedemployee.getEmail());
-        return MapperEmployee.mapToDtoEmployee(repositoryEmployee.save(employee));
+    public DtoEmployee updateEmployee(int id, DtoEmployee updatedEmployee) {
+
+        Employee employee = repositoryEmployee.findById(id)
+                .orElseThrow(() ->
+                        new ExceptionEmployee("Employee not found with id: " + id));
+
+        employee.setName(updatedEmployee.getName());
+        employee.setEmail(updatedEmployee.getEmail());
+        employee.setSalary(updatedEmployee.getSalary());
+        employee.setDepartment(updatedEmployee.getDepartment());
+        employee.setPosition(updatedEmployee.getPosition());
+        employee.setBonus(updatedEmployee.getBonus());
+
+        Employee savedEmployee = repositoryEmployee.save(employee);
+
+        return MapperEmployee.mapToDtoEmployee(savedEmployee);
     }
 
     @Override
     public void deleteEmployee(int id) {
-        Employee employee=repositoryEmployee.findById(id).orElseThrow(()->new ExceptionEmployee("The Employee is not exist or found by given id"+id));
+
+        Employee employee = repositoryEmployee.findById(id)
+                .orElseThrow(() ->
+                        new ExceptionEmployee("Employee not found with id: " + id));
+
         repositoryEmployee.delete(employee);
     }
+
 
 }
